@@ -1,6 +1,9 @@
 package App::PlugBot::JSONStream;
+
 use base qw( IO::Async::Stream );
 use JSON::MaybeXS;
+
+use Try::Tiny;
 
 sub configure {
   my $self = shift;
@@ -19,7 +22,11 @@ sub on_read {
   return if $eof;
 
   while( $$buffref =~ s/^(.*)\n// ) {
-    $self->invoke_event( on_json => decode_json( $1 ) );
+    try {
+      $self->invoke_event( on_json => decode_json( $1 ) );
+    } catch {
+      warn "Couldnt decode JSON - was it valid?: [$_]";
+    }
   }
 
   return 0;

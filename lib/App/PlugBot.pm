@@ -65,13 +65,25 @@ sub run {
 }
 
 sub _incoming_ctrl {
-  my ( $self, $jsonstream, $ctrl ) = @_;
+  my ( $self, $jsonstream, $msg ) = @_;
 
-  for my $ctrl ( values %{$self->ctrlsocks} ) {
-    $ctrl->write_json( { ping => "pong" } );
+  if ( $msg->{ 'cmd' } eq 'watch' ) {
+    $jsonstream->{ 'watches' }{ $msg->{ 'args' } }++;
+    $jsonstream->write_json( { 'status' => 'ok' } );
+  } elsif ( $msg->{ 'cmd' } eq 'unwatch' ) {
+    $jsonstream->{ 'watches' }{ $msg->{ 'args' } }--;
+    $jsonstream->write_json( { 'status' => 'ok' } );
+  } else {
+    $self->send_to_listening( $msg );
   }
-
-  $jsonstream->write_json( { %$ctrl } );
 }
+
+sub send_to_listening {
+  my ( $self, $msg ) = @_;
+
+  for my $ctrl ( values %{ $self->ctrlsocks } ) {
+    $ctrl->write_json( { %$msg } ) if $ctrl->{watches}{ $msg->{ 'cmd' } };
+  }
+};
 
 1;
