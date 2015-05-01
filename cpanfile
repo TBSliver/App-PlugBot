@@ -1,0 +1,3 @@
+IO::Async
+JSON::MaybeXS
+
