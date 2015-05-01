@@ -43,12 +43,11 @@ has ctrlserver => (
         my ( $acc_self, $stream ) = @_;
 
         $stream->configure(
-          on_json   => \&_incoming_ctrl,
+          on_json   => sub { $self->_incoming_ctrl( @_ ) },
           on_closed => sub { delete $self->ctrlsocks->{$_[0]} },
         );
         $acc_self->add_child( $stream );
 
-        ::Dwarn $stream;
         $self->ctrlsocks->{$stream} = $stream;
       },
     );
@@ -66,12 +65,13 @@ sub run {
 }
 
 sub _incoming_ctrl {
-  my ( $ctrlsock, $ctrl ) = @_;
-  my ( $cmd, @args ) = @$ctrl;
+  my ( $self, $jsonstream, $ctrl ) = @_;
 
-  $| = 1;
-  print "Recieved: $cmd - " . join( ' ', @args );
-  $ctrlsock->write_json( { "cmd" => $cmd, "args" => join( ' ', @args) } );
+  for my $ctrl ( values %{$self->ctrlsocks} ) {
+    $ctrl->write_json( { ping => "pong" } );
+  }
+
+  $jsonstream->write_json( { %$ctrl } );
 }
 
 1;
