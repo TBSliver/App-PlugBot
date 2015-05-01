@@ -67,11 +67,13 @@ sub run {
 sub _incoming_ctrl {
   my ( $self, $jsonstream, $msg ) = @_;
 
-  if ( $msg->{ 'cmd' } eq 'watch' ) {
-    $jsonstream->{ 'watches' }{ $msg->{ 'args' } }++;
+  unless ( defined $msg->{ 'cmd' } ) {
+    warn "No cmd defined";
+  } elsif ( $msg->{ 'cmd' } eq 'watch' ) {
+    $jsonstream->{ 'watches' }{ $msg->{ 'args' } } = 1;
     $jsonstream->write_json( { 'status' => 'ok' } );
   } elsif ( $msg->{ 'cmd' } eq 'unwatch' ) {
-    $jsonstream->{ 'watches' }{ $msg->{ 'args' } }--;
+    $jsonstream->{ 'watches' }{ $msg->{ 'args' } } = 0;
     $jsonstream->write_json( { 'status' => 'ok' } );
   } else {
     $self->send_to_listening( $msg );
