@@ -1,4 +1,4 @@
-IO::Async
-JSON::MaybeXS
-Moo
-Try::Tiny
+requires 'IO::Async';
+requires 'JSON::MaybeXS';
+requires 'Moo';
+requires 'Try::Tiny';
