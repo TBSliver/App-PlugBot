@@ -41,10 +41,10 @@ has ctrlserver => (
       handle_class => "App::PlugBot::JSONStream",
       on_accept => sub {
         my ( $acc_self, $stream ) = @_;
-
+        print "opening stream\n";
         $stream->configure(
-          on_json   => sub { $self->_incoming_ctrl( @_ ) },
-          on_closed => sub { delete $self->ctrlsocks->{$_[0]} },
+          on_json   => sub { return $self->_incoming_ctrl( @_ ) },
+          on_closed => sub { print "closing stream\n"; delete $self->ctrlsocks->{$_[0]} },
         );
         $acc_self->add_child( $stream );
 
