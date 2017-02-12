@@ -8,6 +8,7 @@ use lib "$Bin/../lib";
 
 use IO::Async::Loop;
 use App::PlugBot::JSONStream;
+use Data::Dumper;
 
 my $loop = IO::Async::Loop->new;
 
@@ -15,7 +16,7 @@ my $stream = App::PlugBot::JSONStream->new(
   plugbot_socket => $socket_path,
   on_json => sub {
     my ( $self, $data ) = @_;
-    ::Dwarn $data;
+    print Dumper $data;
   },
 );
  
